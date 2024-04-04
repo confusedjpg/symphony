@@ -1,7 +1,10 @@
 package io.github.zyrouge.symphony.ui.components
 
 import android.content.Intent
+import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
@@ -189,6 +193,7 @@ fun SongCard(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun SongDropdownMenu(
     context: ViewContext,
@@ -342,6 +347,21 @@ fun SongDropdownMenu(
             onClick = {
                 onDismissRequest()
                 showInfoDialog = true
+            }
+        )
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(Icons.Filled.Delete, null)
+            },
+            text = {
+                Text("Delete")
+            },
+            onClick = {
+                onDismissRequest()
+                context.symphony.radio.stop()
+                val resolver = context.activity.contentResolver
+                val pending = MediaStore.createDeleteRequest(resolver, mutableListOf(song.uri))
+                context.activity.startIntentSenderForResult(pending.intentSender, 111, null, 0, 0, 0)
             }
         )
         trailingContent?.invoke(this, onDismissRequest)
